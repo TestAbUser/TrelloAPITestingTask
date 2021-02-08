@@ -1,9 +1,8 @@
-﻿using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 using RestSharp.Serialization.Json;
 using RestSharp;
-
+using TestingTrello.Constants;
 using RestSharp.Authenticators;
 
 namespace TestingTrello
@@ -13,21 +12,15 @@ namespace TestingTrello
     /// </summary>
     public class TrelloServiceObj
     {
+        private const string POSTRequestResource = "1/boards/?";
+        private const string GETRequestResource = "1/boards/{id}";
         private const string ApiKey = "key";
         private const string KeyValue = "f524090fa5d2f73d157f216bef8357af";
         private const string Token = "token";
-        private const string TokenValue = "bf6f908bebc021cc4ab793d26bfc4d045139f0411456fb39f903f41c6e2356cb";
+        private const string TokenValue = "bda7d73fa7b7369ed2a5ecbd71714293a0251627a715190487c5997daa5fd60f";
         private const string Url = "https://api.trello.com";
-        private readonly string resource;
-        private readonly Method requestMethod;
-        private readonly RestRequest request;
-
-        public TrelloServiceObj(string resource, RestRequest request, Method requestMethod)
-        {
-            this.resource = resource;
-            this.request = request;
-            this.requestMethod = requestMethod;
-        }
+        public RestRequest Request { get; set; }
+        public IRestResponse Response { get; set; }
 
         public static ApiRequestBuilder CreateBuilder()
         {
@@ -35,35 +28,72 @@ namespace TestingTrello
         }
 
         /// <summary>
-        /// Sends a completed request to server.
+        /// Changes the request resource depending on the request method.
         /// </summary>
-        /// <returns>IRestResponse instance.</returns>
-        public IRestResponse SendRequest()
+        /// <param name="parameterName"></param>
+        /// <param name="parameterValue"></param>
+        private void SetBoardResource(string parameterName, string parameterValue)
         {
-            RestClient client = new RestClient(Url)
+            if (Request.Method == Method.POST)
             {
-                Authenticator = new SimpleAuthenticator(ApiKey, KeyValue, Token, TokenValue)
-            };
-            request.Resource = resource;
-            request.Method = requestMethod;
-            IRestResponse response = client.Execute(request);
+                Request.Resource = POSTRequestResource;
+            }
+            else
+            {
+                Request.AddUrlSegment(parameterName, parameterValue);
+                Request.Resource = GETRequestResource;
+            }
+        }
+
+        /// <summary>
+        /// Sends the request to the server.
+        /// </summary>
+        /// <returns></returns>
+        public IRestResponse SendRequest() 
+        {
+            RestClient client = new RestClient(Url);
+            client.Authenticator = new SimpleAuthenticator(ApiKey, KeyValue, Token, TokenValue);
+            SetBoardResource(ParameterName.BoardId, ParameterValue.boardId);
+            IRestResponse response = client.Execute(Request);
+            Logger.SaveResultsToLog(response.Content);
             return response;
         }
 
         /// <summary>
-        /// In development.
+        /// Extracts the value for board id from the response.
         /// </summary>
-        /// <returns></returns>
-        public IRestResponse SendGetRequest()
+        /// <param name="response">Is used as a parameter to get the board id.</param>
+        /// <returns>Board ID.</returns>
+        internal static string GetBoardId(IRestResponse response)
         {
-            RestClient client = new RestClient(Url)
-            {
-                Authenticator = new SimpleAuthenticator(ApiKey, KeyValue, Token, TokenValue)
-            };
-            request.Method = requestMethod;
-            request.Resource = resource;
-            IRestResponse response = client.Execute(request);
-            return response;
+            JsonDeserializer deserializer = new JsonDeserializer();
+            Board board = deserializer.Deserialize<Board>(response);
+            return board.Id;
+        }
+
+        /// <summary>
+        /// Extracts the value for board background from the response.
+        /// </summary>
+        /// <param name="response"></param>
+        /// <returns></returns>
+        internal static string GetBoardBackground(IRestResponse response)
+        {
+            JsonDeserializer deserializer = new JsonDeserializer();
+            Board board = deserializer.Deserialize<Board>(response);
+            return board.Prefs.Background;
+        }
+
+        internal static IRestResponse CreateBoard()
+        {
+            TrelloServiceObj trelloServiceObj = CreateBuilder().SetBoardProperty(ParameterName.Name, ParameterValue.TestBoard)
+                                                               .SetMethod(Method.POST);
+            return trelloServiceObj.Response;
+        }
+
+        internal static IRestResponse DeleteBoard()
+        {
+            TrelloServiceObj trelloServiceObj = CreateBuilder().SetMethod(Method.DELETE);
+            return trelloServiceObj.Response;
         }
 
         /// <summary>

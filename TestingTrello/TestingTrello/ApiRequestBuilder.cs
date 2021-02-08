@@ -7,38 +7,47 @@ namespace TestingTrello
     /// </summary>
     public class ApiRequestBuilder
     {
-        private string requestResource = "resource";
-        private const string BoardId = "id";
-        private readonly RestRequest request = new RestRequest();
-        private static Method requestMethod = Method.GET;
+        private readonly TrelloServiceObj trelloServiceObj;
 
-        public ApiRequestBuilder SetResource(string resource)
+        public ApiRequestBuilder()
         {
-            requestResource = resource;
+            trelloServiceObj = new TrelloServiceObj()
+            {
+                Request = new RestRequest()
+            };
+        }
+
+        /// <summary>
+        /// Assigns a value to a board property.
+        /// </summary>
+        /// <param name="property"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public ApiRequestBuilder SetBoardProperty(string property, string value)
+        {
+            trelloServiceObj.Request.AddParameter(property, value);
             return this;
         }
 
-        public ApiRequestBuilder SetProperty(string property, string value)
-        {
-            request.AddParameter(property, value);
-            return this;
-        }
-
-        public ApiRequestBuilder SetProperty(string value)
-        {
-            request.AddUrlSegment(BoardId, value);
-            return this;
-        }
-
+        /// <summary>
+        /// Allows to select the request method.
+        /// </summary>
+        /// <param name="method"></param>
+        /// <returns></returns>
         public ApiRequestBuilder SetMethod(Method method)
         {
-            requestMethod = method;
+            trelloServiceObj.Request.Method = method;
             return this;
         }
 
-        public TrelloServiceObj BuildRequest()
+        /// <summary>
+        /// Acquires server response to a request.
+        /// </summary>
+        /// <param name="requestBuilder"></param>
+        public static implicit operator TrelloServiceObj(ApiRequestBuilder requestBuilder)
         {
-            return new TrelloServiceObj(requestResource, request, requestMethod);
+            requestBuilder.trelloServiceObj.Response = requestBuilder.trelloServiceObj.SendRequest();
+            return requestBuilder.trelloServiceObj;
         }
     }
 }

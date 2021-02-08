@@ -1,155 +1,86 @@
-﻿using System.Net;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using RestSharp;
-using RestSharp.Serialization.Json;
+using TestingTrello.Constants;
 
 namespace TestingTrello.Tests
 {
     [TestFixture]
     public class TrelloApiTests
     {
-        private const string BoardName = "name";
-        private const string BoardBackground = "prefs/background";
-        private const string BackgroundColor = "red";
-        private const string Name = "TestBoard";
-        private const string NewName = "UpdatedBoard";
-        private const string POSTRequestResource = "https://api.trello.com/1/boards";
-        private const string GETRequestResource = "https://api.trello.com";
-        private const string PUTRequestResource = "https://api.trello.com/1/boards/{id}";
-        private string boardId;
-
         /// <summary>
         /// Creates a board and gets its ID.
         /// </summary>
-        [OneTimeSetUp]
-        public void PrepareForTest()
+        [SetUp]
+        public void PrepareForTesting()
         {
-            IRestResponse serverResponse = CreateBoard();
-            boardId = GetBoardId(serverResponse);
+            ParameterValue.boardId = TrelloServiceObj.GetBoardId(TrelloServiceObj.CreateBoard());
         }
 
         /// <summary>
-        /// Creates a board.
+        /// Checks that the board has been created.
         /// </summary>
         [Test]
-        public void CreateBoardTest()
+        public void TestCreatingBoard()
         {
-            IRestResponse result = CreateBoard();
-            Logger.SaveResultsToLog(result.Content);
-            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            TrelloServiceObj trelloServiceObj = TrelloServiceObj.CreateBuilder()
+                                                                .SetMethod(Method.GET);
+            Assert.That(trelloServiceObj.Response.Content.Contains(ParameterValue.boardId));
         }
 
         /// <summary>
-        ///Makes GET request and receives a board in response.
+        /// Checks that the board has a new name.
         /// </summary>
         [Test]
-        public void GetBoardTest()
+        public void TestChangingBoardName()
         {
-            IRestResponse result = TrelloServiceObj.CreateBuilder()
-                                                   .SetResource(GETRequestResource)
-                                                   .SetProperty(boardId)
-                                                   .SetMethod(Method.GET)
-                                                   .BuildRequest()
-                                                   .SendRequest();
-            Logger.SaveResultsToLog(result.Content);
-            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            TrelloServiceObj trelloServiceObj = TrelloServiceObj.CreateBuilder()
+                                                                .SetBoardProperty(ParameterName.Name, ParameterValue.NewName)
+                                                                .SetMethod(Method.PUT);
+            Assert.That(trelloServiceObj.Response.Content.Contains(ParameterValue.NewName));
         }
 
         /// <summary>
-        /// Changes the name of a board.
+        /// Checks that the board has a new description.
         /// </summary>
         [Test]
-        public void ChangeBoardNameTest()
+        public void TestChangingBoardDescription()
         {
-            IRestResponse response = TrelloServiceObj.CreateBuilder()
-                                                   .SetResource(PUTRequestResource)
-                                                   .SetProperty(boardId)
-                                                   .SetProperty(BoardName, NewName)
-                                                   .SetMethod(Method.PUT)
-                                                   .BuildRequest()
-                                                   .SendRequest();
-            Logger.SaveResultsToLog(response.Content);
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            TrelloServiceObj trelloServiceObj = TrelloServiceObj.CreateBuilder()
+                                                                .SetBoardProperty(ParameterName.Description, ParameterName.NewDescription)
+                                                                .SetMethod(Method.PUT);
+            Assert.That(trelloServiceObj.Response.Content.Contains(ParameterName.NewDescription));
         }
 
         /// <summary>
-        /// Changes the background of a board.
+        /// Checks that the board has a new background.
         /// </summary>
         [Test]
-        public void ChangeBoardBackgroundTest()
+        public void TestChangingBoardBackground()
         {
-            IRestResponse response = TrelloServiceObj.CreateBuilder()
-                                                   .SetResource(PUTRequestResource)
-                                                   .SetProperty(boardId)
-                                                   .SetProperty(BoardBackground, BackgroundColor)
-                                                   .SetMethod(Method.PUT)
-                                                   .BuildRequest()
-                                                   .SendRequest();
-
-            Logger.SaveResultsToLog(response.Content);
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            TrelloServiceObj trelloServiceObj = TrelloServiceObj.CreateBuilder()
+                                                                .SetBoardProperty(ParameterName.Background, ParameterValue.NewBackgroundColor)
+                                                                .SetMethod(Method.PUT);
+            var background = TrelloServiceObj.GetBoardBackground(trelloServiceObj.Response);
+            Assert.IsTrue(background == ParameterValue.NewBackgroundColor);
         }
 
         /// <summary>
-        /// Deletes a board.
+        /// Deletes the board.
         /// </summary>
         [Test]
-        public void DeleteBoardTest()
+        public void TestDeletingBoard()
         {
-            IRestResponse response = DeleteBoard();
-            Logger.SaveResultsToLog(response.Content);
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            IRestResponse response = TrelloServiceObj.DeleteBoard();
+            Assert.IsFalse(response.Content.Contains(ParameterValue.boardId));
         }
 
         /// <summary>
-        /// Deletes a board after tests have been completed.
+        /// Deletes the board after tests have been completed.
         /// </summary>
-        [OneTimeTearDown]
+        [TearDown]
         public void CleanUp()
         {
-            DeleteBoard();
-        }
-
-        /// <summary>
-        /// Creates aboard
-        /// </summary>
-        /// <returns>IRestResponse instance.</returns>
-        private IRestResponse CreateBoard()
-        {
-            IRestResponse response = TrelloServiceObj.CreateBuilder()
-                                                     .SetResource(POSTRequestResource)
-                                                     .SetProperty(BoardName, Name)
-                                                     .SetMethod(Method.POST)
-                                                     .BuildRequest()
-                                                     .SendRequest();
-            return response;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="response">Is used as a parameter to get the board id.</param>
-        /// <returns>Board ID.</returns>
-        private string GetBoardId(IRestResponse response)
-        {
-            JsonDeserializer deserializer = new JsonDeserializer();
-            Board board = deserializer.Deserialize<Board>(response);
-            return board.id;
-        }
-
-        /// <summary>
-        /// Deletes a board.
-        /// </summary>
-        /// <returns>Request response.</returns>
-        private IRestResponse DeleteBoard()
-        {
-            IRestResponse response = TrelloServiceObj.CreateBuilder()
-                                                     .SetResource(PUTRequestResource)
-                                                     .SetProperty(boardId)
-                                                     .SetMethod(Method.DELETE)
-                                                     .BuildRequest()
-                                                     .SendRequest();
-            return response;
+            TrelloServiceObj.DeleteBoard();
         }
     }
 }
