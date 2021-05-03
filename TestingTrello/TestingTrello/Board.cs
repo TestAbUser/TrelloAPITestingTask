@@ -10,12 +10,6 @@ namespace TestingTrello
         public LabelNames LabelNames { get; set; }
     }
 
-    //public enum Colors
-    //{
-    //    red = ffb04632
-
-    //}
-
     public class Prefs
     {
         public string PermissionLevel { get; set; }
