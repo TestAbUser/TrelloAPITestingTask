@@ -61,8 +61,8 @@
   <ItemGroup>
     <Compile Include="ApiRequestBuilder.cs" />
     <Compile Include="Board.cs" />
-    <Compile Include="Constants\ParameterName.cs" />
-    <Compile Include="Constants\ParameterValue.cs" />
+    <Compile Include="Constants\BoardParameterName.cs" />
+    <Compile Include="Constants\BoardParameterValue.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -76,6 +76,7 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+    <None Include="test.runsettings" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

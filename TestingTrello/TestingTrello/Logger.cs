@@ -14,7 +14,7 @@ namespace TestingTrello
 
             try
             {
-                fileStream = new FileStream(@".\Log.txt", FileMode.OpenOrCreate, FileAccess.Write);
+                fileStream = new FileStream(@"C:\Users\Rashid_Isayev\source\Localrepos_GIT\TestingTrello\TestingTrello\Log.txt", FileMode.OpenOrCreate, FileAccess.Write);
                 streamWriter = new StreamWriter(fileStream);
                 streamWriter.WriteLine(results);
 

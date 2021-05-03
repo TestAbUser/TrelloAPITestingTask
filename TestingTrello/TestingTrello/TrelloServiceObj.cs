@@ -12,88 +12,59 @@ namespace TestingTrello
     /// </summary>
     public class TrelloServiceObj
     {
-        private const string POSTRequestResource = "1/boards/?";
-        private const string GETRequestResource = "1/boards/{id}";
         private const string ApiKey = "key";
         private const string KeyValue = "f524090fa5d2f73d157f216bef8357af";
         private const string Token = "token";
         private const string TokenValue = "bda7d73fa7b7369ed2a5ecbd71714293a0251627a715190487c5997daa5fd60f";
         private const string Url = "https://api.trello.com";
-        public RestRequest Request { get; set; }
-        public IRestResponse Response { get; set; }
+        public static RestClient client = new RestClient(Url);
+        internal ApiRequestBuilder requestBuilder;
+        internal static Board board;
+        internal RestResponse response;
 
-        public static ApiRequestBuilder CreateBuilder()
+        public TrelloServiceObj()
         {
-            return new ApiRequestBuilder();
-        }
-
-        /// <summary>
-        /// Changes the request resource depending on the request method.
-        /// </summary>
-        /// <param name="parameterName"></param>
-        /// <param name="parameterValue"></param>
-        private void SetBoardResource(string parameterName, string parameterValue)
-        {
-            if (Request.Method == Method.POST)
-            {
-                Request.Resource = POSTRequestResource;
-            }
-            else
-            {
-                Request.AddUrlSegment(parameterName, parameterValue);
-                Request.Resource = GETRequestResource;
-            }
+            client.Authenticator = new SimpleAuthenticator(ApiKey, KeyValue, Token, TokenValue);
+            requestBuilder = new ApiRequestBuilder();
         }
 
         /// <summary>
         /// Sends the request to the server.
         /// </summary>
         /// <returns></returns>
-        public IRestResponse SendRequest() 
+        public static RestResponse SendRequest(RestRequest request)
         {
-            RestClient client = new RestClient(Url);
-            client.Authenticator = new SimpleAuthenticator(ApiKey, KeyValue, Token, TokenValue);
-            SetBoardResource(ParameterName.BoardId, ParameterValue.boardId);
-            IRestResponse response = client.Execute(Request);
+            RestResponse response = (RestResponse)client.Execute(request);
             Logger.SaveResultsToLog(response.Content);
             return response;
         }
 
         /// <summary>
-        /// Extracts the value for board id from the response.
-        /// </summary>
-        /// <param name="response">Is used as a parameter to get the board id.</param>
-        /// <returns>Board ID.</returns>
-        internal static string GetBoardId(IRestResponse response)
-        {
-            JsonDeserializer deserializer = new JsonDeserializer();
-            Board board = deserializer.Deserialize<Board>(response);
-            return board.Id;
-        }
-
-        /// <summary>
-        /// Extracts the value for board background from the response.
+        /// Deserializes the response.
         /// </summary>
         /// <param name="response"></param>
         /// <returns></returns>
-        internal static string GetBoardBackground(IRestResponse response)
+        internal static Board GetBoard(IRestResponse response)
         {
             JsonDeserializer deserializer = new JsonDeserializer();
-            Board board = deserializer.Deserialize<Board>(response);
-            return board.Prefs.Background;
+            board = deserializer.Deserialize<Board>(response);
+            return board;
         }
 
-        internal static IRestResponse CreateBoard()
+        internal static RestResponse CreateBoard()
         {
-            TrelloServiceObj trelloServiceObj = CreateBuilder().SetBoardProperty(ParameterName.Name, ParameterValue.TestBoard)
-                                                               .SetMethod(Method.POST);
-            return trelloServiceObj.Response;
+            TrelloServiceObj trelloServiceObj = new TrelloServiceObj();
+            trelloServiceObj.response = trelloServiceObj.requestBuilder
+                                   .SetBoardParameter(BoardParameterName.Name, BoardParameterValue.TestBoard)
+                                   .SetMethod(Method.POST);
+            return trelloServiceObj.response;
         }
 
-        internal static IRestResponse DeleteBoard()
+        internal static RestResponse DeleteBoard()
         {
-            TrelloServiceObj trelloServiceObj = CreateBuilder().SetMethod(Method.DELETE);
-            return trelloServiceObj.Response;
+            TrelloServiceObj trelloServiceObj = new TrelloServiceObj();
+            trelloServiceObj.response = trelloServiceObj.requestBuilder.SetMethod(Method.DELETE);
+            return trelloServiceObj.response;
         }
 
         /// <summary>

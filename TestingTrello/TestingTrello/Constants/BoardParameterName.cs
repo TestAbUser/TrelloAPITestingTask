@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TestingTrello.Constants
 {
-    public static class ParameterName
+    public static class BoardParameterName
     {
         internal const string BoardId = "id";
         internal const string Name = "name";

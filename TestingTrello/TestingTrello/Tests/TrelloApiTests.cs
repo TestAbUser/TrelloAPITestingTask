@@ -13,7 +13,7 @@ namespace TestingTrello.Tests
         [SetUp]
         public void PrepareForTesting()
         {
-            ParameterValue.boardId = TrelloServiceObj.GetBoardId(TrelloServiceObj.CreateBoard());
+            BoardParameterValue.Id = TrelloServiceObj.GetBoard(TrelloServiceObj.CreateBoard()).Id;
         }
 
         /// <summary>
@@ -22,9 +22,9 @@ namespace TestingTrello.Tests
         [Test]
         public void TestCreatingBoard()
         {
-            TrelloServiceObj trelloServiceObj = TrelloServiceObj.CreateBuilder()
-                                                                .SetMethod(Method.GET);
-            Assert.That(trelloServiceObj.Response.Content.Contains(ParameterValue.boardId));
+            TrelloServiceObj trelloServiceObj = new TrelloServiceObj();
+            trelloServiceObj.response = trelloServiceObj.requestBuilder.SetMethod(Method.GET);
+            Assert.That(trelloServiceObj.response.Content.Contains(BoardParameterValue.Id));
         }
 
         /// <summary>
@@ -33,10 +33,11 @@ namespace TestingTrello.Tests
         [Test]
         public void TestChangingBoardName()
         {
-            TrelloServiceObj trelloServiceObj = TrelloServiceObj.CreateBuilder()
-                                                                .SetBoardProperty(ParameterName.Name, ParameterValue.NewName)
-                                                                .SetMethod(Method.PUT);
-            Assert.That(trelloServiceObj.Response.Content.Contains(ParameterValue.NewName));
+            TrelloServiceObj trelloServiceObj = new TrelloServiceObj();
+            trelloServiceObj.response = trelloServiceObj.requestBuilder
+                                                        .SetBoardParameter(BoardParameterName.Name, BoardParameterValue.NewName)
+                                                        .SetMethod(Method.PUT);
+            Assert.That(trelloServiceObj.response.Content.Contains(BoardParameterValue.NewName));
         }
 
         /// <summary>
@@ -45,10 +46,11 @@ namespace TestingTrello.Tests
         [Test]
         public void TestChangingBoardDescription()
         {
-            TrelloServiceObj trelloServiceObj = TrelloServiceObj.CreateBuilder()
-                                                                .SetBoardProperty(ParameterName.Description, ParameterName.NewDescription)
-                                                                .SetMethod(Method.PUT);
-            Assert.That(trelloServiceObj.Response.Content.Contains(ParameterName.NewDescription));
+            TrelloServiceObj trelloServiceObj = new TrelloServiceObj();
+            trelloServiceObj.response = trelloServiceObj.requestBuilder
+                                                               .SetBoardParameter(BoardParameterName.Description, BoardParameterName.NewDescription)
+                                                               .SetMethod(Method.PUT);
+            Assert.That(trelloServiceObj.response.Content.Contains(BoardParameterName.NewDescription));
         }
 
         /// <summary>
@@ -57,11 +59,12 @@ namespace TestingTrello.Tests
         [Test]
         public void TestChangingBoardBackground()
         {
-            TrelloServiceObj trelloServiceObj = TrelloServiceObj.CreateBuilder()
-                                                                .SetBoardProperty(ParameterName.Background, ParameterValue.NewBackgroundColor)
+            TrelloServiceObj trelloServiceObj = new TrelloServiceObj();
+            trelloServiceObj.response = trelloServiceObj.requestBuilder
+                                                                .SetBoardParameter(BoardParameterName.Background, BoardParameterValue.BackgroundColor)
                                                                 .SetMethod(Method.PUT);
-            var background = TrelloServiceObj.GetBoardBackground(trelloServiceObj.Response);
-            Assert.IsTrue(background == ParameterValue.NewBackgroundColor);
+            string background = TrelloServiceObj.GetBoard(trelloServiceObj.response).Prefs.BackgroundColor;
+            Assert.IsTrue(background == BoardParameterValue.NewBackgroundColor);
         }
 
         /// <summary>
@@ -71,7 +74,7 @@ namespace TestingTrello.Tests
         public void TestDeletingBoard()
         {
             IRestResponse response = TrelloServiceObj.DeleteBoard();
-            Assert.IsFalse(response.Content.Contains(ParameterValue.boardId));
+            Assert.IsFalse(response.Content.Contains(BoardParameterValue.Id));
         }
 
         /// <summary>
