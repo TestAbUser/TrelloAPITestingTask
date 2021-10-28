@@ -1,0 +1,276 @@
+{
+	"version": 1,
+	"collections": [
+		{
+			"id": "fd85f83b-9d8e-48b9-8dc1-2e0fb5697406",
+			"uid": "0-fd85f83b-9d8e-48b9-8dc1-2e0fb5697406",
+			"name": "Trello",
+			"description": null,
+			"auth": null,
+			"events": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "1c34b85c-8636-4ed7-acf8-6fd44263413a",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "41aff5bc-7e2c-4223-b32f-11e8f4812cdf",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"variables": [
+				{
+					"key": "key",
+					"value": "f524090fa5d2f73d157f216bef8357af",
+					"disabled": false
+				},
+				{
+					"key": "token",
+					"value": "bda7d73fa7b7369ed2a5ecbd71714293a0251627a715190487c5997daa5fd60f",
+					"disabled": false
+				},
+				{
+					"key": "boardId",
+					"value": "",
+					"disabled": false
+				}
+			],
+			"order": [
+				"ac48b8de-dedd-457b-922f-72b4a26dca89",
+				"ea9a1f82-2e46-4f52-9a17-c9d2b06d7fe0",
+				"ca769742-ce13-437a-a73b-a12833a98e29"
+			],
+			"folders_order": [],
+			"protocolProfileBehavior": {},
+			"createdAt": "2021-10-24T02:45:39.553Z",
+			"folders": [],
+			"requests": [
+				{
+					"id": "ac48b8de-dedd-457b-922f-72b4a26dca89",
+					"uid": "0-ac48b8de-dedd-457b-922f-72b4a26dca89",
+					"name": "CreateNewBoard",
+					"url": "{{baseURL}}/1/boards/?",
+					"description": null,
+					"data": [],
+					"dataOptions": {
+						"raw": {
+							"language": "json"
+						}
+					},
+					"dataMode": "raw",
+					"headerData": [
+						{
+							"key": "Authorization",
+							"value": "OAuth oauth_consumer_key=\"{{key}}\", oauth_token=\"{{token}}\"",
+							"description": "",
+							"type": "text",
+							"enabled": true
+						}
+					],
+					"method": "POST",
+					"pathVariableData": [],
+					"queryParams": [
+						{
+							"key": "",
+							"value": null,
+							"equals": false,
+							"description": "",
+							"enabled": true
+						}
+					],
+					"auth": {
+						"type": "noauth",
+						"noauth": []
+					},
+					"events": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "df5fe5f5-6c3d-40c5-8d5a-c727cd9f2c76",
+								"exec": [
+									"pm.test(\"Status test\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"    pm.response.to.have.jsonBody(\"id\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Get board id for other tests\", () => {\r",
+									"    let jsonValue = pm.response.json();\r",
+									"    pm.collectionVariables.set(\"boardId\", jsonValue.id);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Board name test\", () => {\r",
+									"    let requestData = JSON.parse(request.data);\r",
+									"    let responseData = pm.response.json();\r",
+									"    pm.expect(responseData.name).to.equal(requestData.name);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"folder": null,
+					"responses_order": [],
+					"preRequestScript": null,
+					"tests": "pm.test(\"Status test\", () => {\r\n    pm.response.to.have.status(200);\r\n    pm.response.to.have.jsonBody(\"id\");\r\n});\r\n\r\npm.test(\"Get board id for other tests\", () => {\r\n    let jsonValue = pm.response.json();\r\n    pm.collectionVariables.set(\"boardId\", jsonValue.id);\r\n});\r\n\r\npm.test(\"Board name test\", () => {\r\n    let requestData = JSON.parse(request.data);\r\n    let responseData = pm.response.json();\r\n    pm.expect(responseData.name).to.equal(requestData.name);\r\n});",
+					"currentHelper": null,
+					"helperAttributes": null,
+					"collectionId": "fd85f83b-9d8e-48b9-8dc1-2e0fb5697406",
+					"rawModeData": "{\r\n  \"name\": \"{{$randomWord}}\",\r\n  \"desc\": \"{{$randomCountry}}\"\r\n}",
+					"headers": "Authorization: OAuth oauth_consumer_key=\"{{key}}\", oauth_token=\"{{token}}\"\n",
+					"pathVariables": {}
+				},
+				{
+					"id": "ca769742-ce13-437a-a73b-a12833a98e29",
+					"uid": "0-ca769742-ce13-437a-a73b-a12833a98e29",
+					"name": "DeleteBoard",
+					"url": "{{baseURL}}/1/boards/{{boardId}}",
+					"description": null,
+					"data": null,
+					"dataOptions": null,
+					"dataMode": null,
+					"headerData": [
+						{
+							"key": "Authorization",
+							"value": "OAuth oauth_consumer_key=\"{{key}}\", oauth_token=\"{{token}}\"",
+							"description": "",
+							"type": "text",
+							"enabled": true
+						}
+					],
+					"method": "DELETE",
+					"pathVariableData": [],
+					"queryParams": [],
+					"auth": {
+						"type": "noauth",
+						"noauth": []
+					},
+					"events": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "02758193-73f5-4961-babf-3891cd16b6fd",
+								"exec": [
+									"pm.test(\"Status test\", () => {\r",
+									"    pm.response.to.have.status(\"OK\");\r",
+									"    pm.response.to.have.header(\"Content-Type\");\r",
+									"    pm.expect(pm.response.json()).not.to.be.empty;\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Board is deleted\", () => {\r",
+									"    pm.response.to.not.have.jsonBody(\"id\", pm.collectionVariables.get(\"boardId\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"folder": null,
+					"responses_order": [],
+					"preRequestScript": null,
+					"tests": "pm.test(\"Status test\", () => {\r\n    pm.response.to.have.status(\"OK\");\r\n    pm.response.to.have.header(\"Content-Type\");\r\n    pm.expect(pm.response.json()).not.to.be.empty;\r\n});\r\n\r\npm.test(\"Board is deleted\", () => {\r\n    pm.response.to.not.have.jsonBody(\"id\", pm.collectionVariables.get(\"boardId\"));\r\n});",
+					"currentHelper": null,
+					"helperAttributes": null,
+					"collectionId": "fd85f83b-9d8e-48b9-8dc1-2e0fb5697406",
+					"headers": "Authorization: OAuth oauth_consumer_key=\"{{key}}\", oauth_token=\"{{token}}\"\n",
+					"pathVariables": {}
+				},
+				{
+					"id": "ea9a1f82-2e46-4f52-9a17-c9d2b06d7fe0",
+					"uid": "0-ea9a1f82-2e46-4f52-9a17-c9d2b06d7fe0",
+					"name": "GetBoard",
+					"url": "{{baseURL}}/1/boards/{{boardId}}",
+					"description": null,
+					"data": null,
+					"dataOptions": null,
+					"dataMode": null,
+					"headerData": [
+						{
+							"key": "Authorization",
+							"value": "OAuth oauth_consumer_key=\"{{key}}\", oauth_token=\"{{token}}\"",
+							"description": "",
+							"type": "text",
+							"enabled": true
+						}
+					],
+					"method": "GET",
+					"pathVariableData": [],
+					"queryParams": [],
+					"auth": {
+						"type": "noauth",
+						"noauth": []
+					},
+					"events": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "c3f6d8cd-5385-4a97-b6f4-c8f29c71c511",
+								"exec": [
+									"pm.test(\"Status test\", () => {\r",
+									"    pm.response.to.have.status(\"OK\");\r",
+									"    pm.response.to.have.header(\"Content-Type\");\r",
+									"    pm.expect(pm.response.json()).not.to.be.empty;\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Board id is valid\", () => {\r",
+									"    pm.response.to.have.jsonBody(\"id\", pm.collectionVariables.get(\"boardId\"));\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Value is in valid list\", () => {\r",
+									"    pm.expect(pm.response.json().prefs.invitations)\r",
+									"        .to.be.oneOf([\"members\", \"admins\"]);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Description exists\", () => {\r",
+									"    pm.expect(pm.response.json().desc)\r",
+									"        .not.to.be.empty;\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"folder": null,
+					"responses_order": [],
+					"preRequestScript": null,
+					"tests": "pm.test(\"Status test\", () => {\r\n    pm.response.to.have.status(\"OK\");\r\n    pm.response.to.have.header(\"Content-Type\");\r\n    pm.expect(pm.response.json()).not.to.be.empty;\r\n});\r\n\r\npm.test(\"Board id is valid\", () => {\r\n    pm.response.to.have.jsonBody(\"id\", pm.collectionVariables.get(\"boardId\"));\r\n});\r\n\r\npm.test(\"Value is in valid list\", () => {\r\n    pm.expect(pm.response.json().prefs.invitations)\r\n        .to.be.oneOf([\"members\", \"admins\"]);\r\n});\r\n\r\npm.test(\"Description exists\", () => {\r\n    pm.expect(pm.response.json().desc)\r\n        .not.to.be.empty;\r\n});",
+					"currentHelper": null,
+					"helperAttributes": null,
+					"collectionId": "fd85f83b-9d8e-48b9-8dc1-2e0fb5697406",
+					"headers": "Authorization: OAuth oauth_consumer_key=\"{{key}}\", oauth_token=\"{{token}}\"\n",
+					"pathVariables": {}
+				}
+			]
+		}
+	],
+	"environments": [
+		{
+			"id": "111787dc-4dba-485f-be4f-fc1f0869b776",
+			"name": "Trello",
+			"values": [
+				{
+					"key": "baseURL",
+					"value": "https://api.trello.com",
+					"enabled": true
+				}
+			]
+		},
+		{
+			"id": "0db55604-21e0-4649-be2e-6eb3333979dc",
+			"name": "My Workspace - globals",
+			"values": []
+		}
+	],
+	"headerPresets": [],
+	"globals": []
+}
