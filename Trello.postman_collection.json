@@ -1,0 +1,219 @@
+{
+	"info": {
+		"_postman_id": "fd85f83b-9d8e-48b9-8dc1-2e0fb5697406",
+		"name": "Trello",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "CreateNewBoard",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", () => {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.jsonBody(\"id\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Get board id for other tests\", () => {\r",
+							"    let jsonValue = pm.response.json();\r",
+							"    pm.collectionVariables.set(\"boardId\", jsonValue.id);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Board name test\", () => {\r",
+							"    let requestData = JSON.parse(request.data);\r",
+							"    let responseData = pm.response.json();\r",
+							"    pm.expect(responseData.name).to.equal(requestData.name);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "OAuth oauth_consumer_key=\"{{key}}\", oauth_token=\"{{token}}\"",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"{{$randomWord}}\",\r\n  \"desc\": \"{{$randomCountry}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseURL}}/1/boards/?",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"boards",
+						""
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetBoard",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", () => {\r",
+							"    pm.response.to.have.status(\"OK\");\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"    pm.expect(pm.response.json()).not.to.be.empty;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Board id is valid\", () => {\r",
+							"    pm.response.to.have.jsonBody(\"id\", pm.collectionVariables.get(\"boardId\"));\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Value is in valid list\", () => {\r",
+							"    pm.expect(pm.response.json().prefs.invitations)\r",
+							"        .to.be.oneOf([\"members\", \"admins\"]);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Description exists\", () => {\r",
+							"    pm.expect(pm.response.json().desc)\r",
+							"        .not.to.be.empty;\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "OAuth oauth_consumer_key=\"{{key}}\", oauth_token=\"{{token}}\"",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseURL}}/1/boards/{{boardId}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"boards",
+						"{{boardId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteBoard",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", () => {\r",
+							"    pm.response.to.have.status(\"OK\");\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"    pm.expect(pm.response.json()).not.to.be.empty;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Board is deleted\", () => {\r",
+							"    pm.response.to.not.have.jsonBody(\"id\", pm.collectionVariables.get(\"boardId\"));\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "OAuth oauth_consumer_key=\"{{key}}\", oauth_token=\"{{token}}\"",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseURL}}/1/boards/{{boardId}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"boards",
+						"{{boardId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "key",
+			"value": "f524090fa5d2f73d157f216bef8357af"
+		},
+		{
+			"key": "token",
+			"value": "bda7d73fa7b7369ed2a5ecbd71714293a0251627a715190487c5997daa5fd60f"
+		},
+		{
+			"key": "boardId",
+			"value": ""
+		},
+		{
+			"key": "baseURL",
+			"value": "https://api.trello.com"
+		}
+	]
+}
